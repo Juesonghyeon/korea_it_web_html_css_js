@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CSS 적용 방식</title>
+    <style>
+        p {
+            color: hotpink;
+            font-size: 20px;
+            border: 2px solid black;
+            border-radius: 15px !important;
+        }
+    </style>
+  </head>
+  <body>
+    <h1>인라인 스타일과 내부 스타일</h1>
+    <hr />
+    <p
+      style="
+        color: blue;
+        font-weight: bolder;
+        border: px solid black;
+        /* margin: 20px; */
+        padding: 20px;
+        border-radius: 50px
+      "
+    >
+      Lorem ipsum dolor sit amet consectetur adipisicing elit. Officia, dolor
+      asperiores maiores eos assumenda fuga, quae quaerat iste quidem,
+      recusandae porro pariatur nobis similique? Dolor sequi laudantium nulla
+      illum eligendi.
+    </p>
+
+    <hr />
+    <p id="text1">
+      Lorem ipsum dolor, sit amet consectetur adipisicing elit. Quod quisquam
+      veniam voluptates laboriosam. Aliquid, maiores ullam autem quisquam
+      aliquam atque, non nobis vitae et ad iure, quae doloribus neque saepe?
+    </p>
+    <strong>가까울 수록 우선순위</strong>
+  </body>
+</html>
