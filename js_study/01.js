@@ -5,7 +5,7 @@ console.log(name);
 name = "김송현";
 console.log(name);
 
-//const는 한 번 할당하면 ㄱ밧을 변경할 수 없는 상수를 선언할 때 사용
+//const는 한 번 할당하면 값을 변경할 수 없는 상수를 선언할 때 사용
 const age = 18;
 console.log(age);
 
