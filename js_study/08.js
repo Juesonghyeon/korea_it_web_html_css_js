@@ -139,12 +139,25 @@ const products = [
 //10%할인한 discountProducts배열을 만드세요
 
 //1
-const expensiveProducts = (products.filter(products => products.price >= 5000));
+const expensiveProducts = (products.filter(products => products.price >= 50000));
 console.log(expensiveProducts);
 
 //2
-const productNamesAndPrices = products.map(products => 
-    [products.name, products.price]
-)
+const productNamesAndPrices = products.map((products) => ({
+    name: products.name,
+    price: products.price
+}));
 console.log(productNamesAndPrices)
 
+
+
+discountProducts = products
+.filter((products => products.category === "전자제품"))
+.map((products) => ({
+    name: products.name,
+    price: products.price * 0.9
+}));
+console.log(discountProducts)
+
+
+                               
