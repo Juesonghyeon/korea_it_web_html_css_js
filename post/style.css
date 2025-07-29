@@ -107,3 +107,17 @@ h2 {
 .detail-btn:hover {
 	background-color: #138496;
 }
+
+#backBtn {
+	background-color: lightgreen;
+	width: 250px;
+	height: 50px;
+	border: none;
+	border-radius: 4px;
+	box-sizing: border-box;
+	font-size: 1em;
+}
+
+#backBtn :hover{
+	background-color: lime
+}
