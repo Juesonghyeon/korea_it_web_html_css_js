@@ -12,6 +12,8 @@
 				<nav>
 					<button id="nav-signin">로그인</button>
 					<button id="nav-signup">회원가입</button>
+					<button id="nav-logout">로그아웃</button>
+					<button id="nav-changepassword">보안설정</button>
 					<button id="nav-board">게시판</button>
 					<button id="nav-write">글쓰기</button>
 				</nav>
@@ -58,10 +60,39 @@
 						</button>
 					</form>
 				</div>
+				<div id="page-password" class="page">
+					<h2>비밀번호 교체</h2>
+					<form id="change-form">
+						<input 
+						type="password"
+						id="old-password"
+						placeholder="기존 비밀번호를 입력하세요"
+						>
+						<input 
+						type="password"
+						id="new-password"
+						placeholder="새 비밀번호를 입력하세요"
+						>
+						<input
+						type=""password
+						id="check-password"
+						placeholder="새 비밀번호 확인">
+						<button type="submit" class="btn-submit">
+							비밀번호 적용
+						</button>
+					</form>
+				</div>
 				<!-- 게시판 리스트 -->
 				<div id="page-board" class="page">
 					<h2>게시물 목록</h2>
 					<ul id="board-list"></ul>
+				</div>
+				<!-- 게시판 상세 -->
+				<div id="page-detail" class="page">
+					<h2 id="detail-title">제목이 들어갈 자리</h2>
+					<p id="detail-userid">유저 id가 들어갈 자리</p>
+					<p id="detail-content">내용이 들어갈 자리</p>
+					<button id="back-btn">목록으로</button>
 				</div>
 				<!-- 게시판 글쓰기 -->
 				<div id="page-write" class="page">

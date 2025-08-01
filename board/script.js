@@ -3,14 +3,19 @@ const API_BASE_URL = "http://localhost:8080";
 //메뉴
 const navSignin = document.querySelector("#nav-signin");
 const navSignup = document.querySelector("#nav-signup");
+const navLogout = document.querySelector("#nav-logout");
 const navBoard = document.querySelector("#nav-board");
 const navWrite = document.querySelector("#nav-write");
+const navPassword = document.querySelector("#nav-changepassword");
+// console.dir(navSignin);
 
 //페이지
 const pageSignin = document.querySelector("#page-signin");
 const pageSignup = document.querySelector("#page-signup");
 const pageBoard = document.querySelector("#page-board");
+const pagePassword = document.querySelector("#page-password");
 const pageWrite = document.querySelector("#page-write");
+const pageDetail = document.querySelector("#page-detail");
 
 //로그인 및 회원가입 폼
 const signupForm = document.querySelector("#signup-form");
@@ -21,6 +26,15 @@ const boardList = document.querySelector("#board-list");
 
 //게시물 추가
 const writeForm = document.querySelector("#write-form");
+
+//게시물 상세
+const detailTitle = document.querySelector("#detail-title");
+const detailUserId = document.querySelector("#detail-userid");
+const detailContent = document.querySelector("#detail-content");
+const backBtn = document.querySelector("#back-btn");
+
+//비밀번호 재생성 폼
+const changeForm = document.querySelector("#change-form")
 
 let boards = [];
 
@@ -91,7 +105,14 @@ async function renderBoard() {
 			boardList.innerHTML = "";
 
 			boards.forEach((board) => {
-				boardList.innerHTML += `<li>${board.title}</li>`;
+				const listItem = document.createElement("li");
+				listItem.innerText = board.title;
+
+				listItem.addEventListener("click", () => {
+					getBoard(board.boardId);
+				});
+
+				boardList.appendChild(listItem);
 			});
 
 			changePages(pageBoard);
@@ -102,11 +123,93 @@ async function renderBoard() {
 	}
 }
 
+//게시물 단건 조회 요청 함수
+async function getBoard(boardId) {
+	const accessToken = localStorage.getItem("AccessToken");
+
+	if (!accessToken) {
+		alert("게시물을 조하려면 로그인이 필요합니다.");
+		changePages(pageSignin);
+		return;
+	}
+
+	try {
+		const response = await fetch(`${API_BASE_URL}/board/${boardId}`, {
+			method: "GET",
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			},
+		});
+
+		const responseData = await response.json();
+
+		if (responseData.status === "success") {
+			detailTitle.innerText = responseData.data.title;
+			detailUserId.innerText = `유저 ID : ${responseData.data.userId}`;
+			detailContent.innerText = responseData.data.content;
+			changePages(pageDetail);
+		}
+	} catch (error) {}
+}
+
 //게시물 추가 요청 함수
 async function addBoard(event) {
 	event.preventDefault();
+
+	//요청 보내기전 필요한 데이터 가져오
 	const userInfo = await getPayload();
-	console.log(userInfo);
+
+	const titleInput = document.querySelector("#write-title");
+	const contentInput = document.querySelector("#write-content");
+
+	const accessToken = localStorage.getItem("AccessToken");
+
+	//혹시 모를 accessToken이 없는 경우 (유효성 검사)
+	//요청에는 accessToken이 필요하니까
+	if (!accessToken) {
+		alert("글을 작성하려면 로그인이 필요합니다.");
+		changePages(pageSignin);
+		return;
+	}
+
+	//항목에 빈값을 입력하거나 공백을 입력했을 경우 (유효성 검사)
+	if (!titleInput.value.trim() || !contentInput.value.trim()) {
+		alert("모든 항목을 입력해주세요.");
+		return;
+	}
+
+	//요청을 위한 body 데이터 객체 만들기 (포장)
+	const boardData = {
+		title: titleInput.value,
+		content: contentInput.value,
+		userId: userInfo.jti,
+	};
+
+	try {
+		//요청 보내기
+		const response = await fetch(`${API_BASE_URL}/board/add`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${accessToken}`,
+			},
+			body: JSON.stringify(boardData),
+		});
+
+		const responseData = await response.json();
+
+		if (responseData.status !== "success") {
+			alert(responseData.message);
+		} else {
+			alert(responseData.message);
+			writeForm.reset();
+			await renderBoard();
+			changePages(pageBoard);
+		}
+	} catch (error) {
+		console.log(error);
+		alert("게시물 등록 중 오류가 발생했습니다.");
+	}
 }
 
 //로그인 요청 함수
@@ -144,12 +247,73 @@ async function signinHandler(event) {
 			localStorage.setItem("AccessToken", responseData.data);
 			signinForm.reset();
 
-			await renderBoard();
-			changePages(pageBoard);
+			location.reload();
 		}
 	} catch (error) {
 		console.log(error);
 		alert("서버와 통신 중 오류가 발생했습니다.");
+	}
+}
+
+//비밀번호 교체
+async function changepasswordHandler(event){
+	event.preventDefault();
+
+	const oldPasswordInput = document.querySelector("#old-password");
+	const newPasswordInput = document.querySelector("#new-password");
+	const newConfirmPasswordInput = document.querySelector(
+		"#check-password"
+	);
+
+	const accessToken = localStorage.getItem("AccessToken");
+
+	if (!accessToken) {
+		alert("잘못된 접근입니다.");
+		changePages(pageSignin);
+		return;
+	}
+
+	if (newPasswordInput.value !== newConfirmPasswordInput.value) {
+		alert("비밀번호가 일치하지 않습니다.");
+		return;
+	}
+
+	const passwordData = {
+		oldpassword: oldpasswordInput.value,
+		newpassword: newpasswordInput.value,
+		checkpassword: checkpasswordInput.value,
+	};
+	
+	if (!passwordData.newpassword || !passwordData.oldpassword) {
+		alert("아이디 또는 비밀번호를 모두 입력해 주세요.");
+		return;
+	}
+
+	try {
+		const response = await fetch(
+			`${API_BASE_URL}/account/change/password`,
+			{
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${accessToken}`,
+				},
+				body: JSON.stringify(passwordData),
+			}
+		);
+
+		const responseData = await response.json();
+
+		if (responseData.status !== "success") {
+			alert(responseData.message);
+		} else {
+			alert(responseData.message);
+			localStorage.removeItem("AccessToken");
+			location.reload(true);
+		}
+	} catch (error) {
+		console.log(error);
+		alert("비밀번호 변경 요청에 오류가 발생했습니다.");
 	}
 }
 
@@ -199,17 +363,48 @@ async function signupHandler(event) {
 	}
 }
 
+
 navSignin.addEventListener("click", () => {
 	changePages(pageSignin);
 });
 navSignup.addEventListener("click", () => {
 	changePages(pageSignup);
 });
+navLogout.addEventListener("click", () => {
+	if (confirm("정말 로그아웃 하시겠습니까?")) {
+		localStorage.removeItem("AccessToken");
+		location.reload(true);
+	} else {
+		return;
+	}
+});
 navBoard.addEventListener("click", renderBoard);
 navWrite.addEventListener("click", () => {
 	changePages(pageWrite);
 });
+navPassword.addEventListener("click", () => {
+	changePages(pagePassword);
+})
+
+backBtn.addEventListener("click", renderBoard);
 
 signupForm.addEventListener("submit", signupHandler);
 signinForm.addEventListener("submit", signinHandler);
 writeForm.addEventListener("submit", addBoard);
+
+//HTML 문서가 완전히 로드되고 파싱되었을때
+document.addEventListener("DOMContentLoaded", async () => {
+	const accessToken = localStorage.getItem("AccessToken");
+
+	if (accessToken) {
+		navSignin.style.display = "none";
+		navSignup.style.display = "none";
+		
+		await renderBoard();
+	} else {
+		navLogout.style.display = "none";
+		navBoard.style.display = "none";
+		navPassword.style.display = "none";
+		changePages(pageSignin);
+	}
+});
